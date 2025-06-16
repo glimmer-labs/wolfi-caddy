@@ -1,0 +1,114 @@
+#!/bin/sh
+
+set -e
+
+# Defaults
+CADDY_OUTPUT="/usr/bin/caddy"
+CADDY_DOWNLOAD_URL="https://caddyserver.com/api/download"
+CADDY_MODULES=""
+
+# Parse args
+POSITIONAL_MODULES=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --help|-h)
+            echo "Usage: $0 [modules...]"
+            echo ""
+            echo "Downloads Caddy binary from the official API."
+            echo "Falls back to xcaddy if download fails."
+            exit 0
+            ;;
+        *)
+            POSITIONAL_MODULES="$POSITIONAL_MODULES $1"
+            shift
+            ;;
+    esac
+done
+
+# Normalize module list
+CADDY_MODULES="$(echo "$POSITIONAL_MODULES" | sed 's/  */,/g' | sed 's/^,//' | sed 's/,$//')"
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+[ -n "$CADDY_MODULES" ] && echo "[INFO] Modules: $CADDY_MODULES"
+
+caddy_add_package() {
+    echo "[INFO] Attempting caddy 'add-package' subcommand"
+
+    if ! caddy help 2>/dev/null | grep -q "add-package"; then
+        return 1
+    fi
+
+    if [ -z "$CADDY_MODULES" ]; then
+        caddy upgrade
+        echo "[SUCCESS] Caddy updated correctly"
+        return 0
+    fi
+
+    MODULES=""
+    IFS=','; for mod in $CADDY_MODULES; do
+        MODULES="${MODULES:+$MODULES }$mod"
+    done
+
+    caddy add-package "$MODULES" || return 1
+
+    echo "[SUCCESS] Modules installed with caddy 'add-package' correctly"
+    return 0
+}
+
+
+download_from_api() {
+    ARCH="$(uname -m)"
+    case "$ARCH" in
+        x86_64) ARCH="amd64" ;;
+        aarch64|arm64) ARCH="arm64" ;;
+        *) echo "[INFO] Using architecture as-is: $ARCH" ;;
+    esac
+
+    echo "[INFO] Falling back to download from Caddy API..."
+    echo "[INFO] Architecture: $ARCH"
+
+    apk add --no-cache curl
+
+    API_URL="$CADDY_DOWNLOAD_URL?os=linux&arch=$ARCH"
+    [ -n "$CADDY_MODULES" ] && API_URL="$API_URL&p=$CADDY_MODULES"
+
+    echo "[DEBUG] $API_URL"
+    curl -fsSL "$API_URL" -o "$TMP_DIR/caddy" || return 1
+
+    [ -f "$TMP_DIR/caddy" ] || return 1
+
+    mv "$TMP_DIR/caddy" "$CADDY_OUTPUT"
+    chmod +x "$CADDY_OUTPUT"
+    echo "[SUCCESS] Caddy installed correctly from API"
+    return 0
+}
+
+build_with_xcaddy() {
+    echo "[INFO] Falling back to build with xcaddy..."
+
+    if ! command -v xcaddy >/dev/null 2>&1; then
+        echo "[INFO] Installing xcaddy..."
+        apk add --no-cache go git xcaddy
+    fi
+
+    set --
+    IFS=','; for mod in $CADDY_MODULES; do
+        set -- "$@" --with "$mod"
+    done
+
+    xcaddy build $@ --output $CADDY_OUTPUT
+    chmod +x "$CADDY_OUTPUT"
+    echo "[SUCCESS] Caddy built correctly with xcaddy"
+}
+
+
+# === Run ===
+apk add --no-cache caddy
+
+if ! caddy_add_package; then
+    if ! download_from_api; then
+            build_with_xcaddy
+    fi
+fi
