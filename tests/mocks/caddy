@@ -1,0 +1,28 @@
+#!/bin/sh
+
+case "$1" in
+  help)
+    if [ -n "$SIMULATE_CADDY_NO_ADD_PACKAGE" ]; then
+      echo "Basic help output"  # no add-package string
+    else
+      echo "Usage: caddy [commands]"
+      echo "Commands:"
+      echo "  add-package   Install additional modules"
+    fi
+    echo "caddy help called"
+    exit 0
+    ;;
+  upgrade)
+    echo "caddy upgrade called"
+    exit 0
+    ;;
+  add-package)
+    shift
+    echo "caddy add-package called with: $*"
+    exit 0
+    ;;
+  *)
+    echo "caddy called with: $*"
+    exit 0
+    ;;
+esac

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+echo "xcaddy called with: $*"
+
+if [ -n "$SIMULATE_XCADDY_FAILURE" ]; then
+  echo "xcaddy simulated failure" >&2
+  exit 1
+fi
+
+exit 0

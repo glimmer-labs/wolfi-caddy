@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+if [ -n "$SIMULATE_CURL_FAILURE" ]; then
+  echo "curl simulated failure" >&2
+  exit 1
+fi
+
+echo "curl called with: $*" >&2
+
+# Simulate successful download
+# Create fake downloaded binary at the location passed to -o
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o)
+      shift
+      echo "#!/bin/sh" > "$MOCKDIR$1"
+      echo "echo 'fake caddy binary'" >> "$MOCKDIR$1"
+      chmod +x "$MOCKDIR$1"
+      ;;
+  esac
+  shift
+done
+
+exit 0
