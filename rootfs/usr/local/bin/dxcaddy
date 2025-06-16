@@ -98,7 +98,7 @@ build_with_xcaddy() {
         set -- "$@" --with "$mod"
     done
 
-    xcaddy build $@ --output $CADDY_OUTPUT
+    xcaddy build $@ --output $CADDY_OUTPUT || return 1
     chmod +x "$CADDY_OUTPUT"
     echo "[SUCCESS] Caddy built correctly with xcaddy"
 }
@@ -109,6 +109,9 @@ apk add --no-cache caddy
 
 if ! caddy_add_package; then
     if ! download_from_api; then
-            build_with_xcaddy
+        if ! build_with_xcaddy; then
+            echo "[ERROR] Failed to build Caddy with xcaddy"
+            exit 1
+        fi
     fi
 fi
