@@ -3,7 +3,7 @@
 A Docker image based on Wolfi Linux with a script for installing/building Caddy web server with modules easily.
 
 ```dockerfile
-FROM ghcr.io/laravel-glimmer/wolfi-caddy@latest
+FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest
 ```
 
 ## Overview
