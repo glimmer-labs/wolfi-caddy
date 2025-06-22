@@ -18,6 +18,7 @@ The image includes a script for easily install Caddy with additional modules qui
 - Script for installing Caddy with modules quickly
 - Uses `add-package` by default to install Caddy, if it fails it tries with the `download API` directly, if that fails too, it builds Caddy from source using `xcaddy`
 - Adds www-data user and group by default in case you need it
+- Data and Config dirs default to `/data` and `/config` respectively, making it easier to use with volumes
 
 ## Available script
 
