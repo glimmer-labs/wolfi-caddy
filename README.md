@@ -17,7 +17,6 @@ The image includes a script for easily install Caddy with additional modules qui
 - Based on Wolfi Linux (cgr.dev/chainguard/wolfi-base)
 - Script for installing Caddy with modules quickly
 - Uses `add-package` by default to install Caddy, if it fails it tries with the `download API` directly, if that fails too, it builds Caddy from source using `xcaddy`
-- Adds www-data user and group by default in case you need it
 - Data and Config dirs default to `/data` and `/config` respectively, making it easier to use with volumes
 - Sets default CMD to run caddy using `/etc/caddy/Caddyfile` with `caddyfile` as adapter
 
@@ -43,13 +42,11 @@ FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest as caddy
 # Install Caddy with the geoip2 module example
 RUN dxcaddy github.com/zhangjiayin/caddy-geoip2
 
-FROM cgr.dev/chainguard/wolfi-base:latest
+FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest
 
 # Copy the Caddy binary from the previous stage
 COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
 
-USER www-data
-
-# Run Caddy with a simple Caddyfile
+# Run Caddy with a simple Caddyfile (this is the default CMD, here we are overriding it)
 ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 ```
