@@ -6,6 +6,7 @@ set -e
 CADDY_OUTPUT="/usr/bin/caddy"
 CADDY_DOWNLOAD_URL="https://caddyserver.com/api/download"
 CADDY_MODULES=""
+COMMAND_TIMEOUT="${COMMAND_TIMEOUT:-90}"  # Default 90 seconds timeout
 
 # Parse args
 POSITIONAL_MODULES=""
@@ -16,6 +17,9 @@ while [ "$#" -gt 0 ]; do
             echo ""
             echo "Downloads Caddy binary from the official API."
             echo "Falls back to xcaddy if download fails."
+            echo ""
+            echo "Environment variables:"
+            echo "  COMMAND_TIMEOUT    Timeout in seconds for downloading commands (default: 90)"
             exit 0
             ;;
         *)
@@ -30,6 +34,10 @@ CADDY_MODULES="$(echo "$POSITIONAL_MODULES" | sed 's/  */,/g' | sed 's/^,//' | s
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
+
+run_with_timeout() {
+    timeout "$COMMAND_TIMEOUT" "$@"
+}
 
 [ -n "$CADDY_MODULES" ] && echo "[INFO] Modules: $CADDY_MODULES"
 
@@ -51,7 +59,7 @@ caddy_add_package() {
         MODULES="${MODULES:+$MODULES }$mod"
     done
 
-    caddy add-package "$MODULES" || return 1
+    run_with_timeout caddy add-package "$MODULES" || return 1
 
     echo "[SUCCESS] Modules installed with caddy 'add-package' correctly"
     return 0
@@ -75,7 +83,7 @@ download_from_api() {
     [ -n "$CADDY_MODULES" ] && API_URL="$API_URL&p=$CADDY_MODULES"
 
     echo "[DEBUG] $API_URL"
-    curl -fsSL "$API_URL" -o "$TMP_DIR/caddy" || return 1
+    run_with_timeout curl -fsSL "$API_URL" -o "$TMP_DIR/caddy" || return 1
 
     [ -f "$TMP_DIR/caddy" ] || return 1
 
