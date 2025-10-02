@@ -3,7 +3,7 @@
 A Docker image based on Wolfi Linux with a script for installing/building Caddy web server with modules easily.
 
 ```dockerfile
-FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
 ```
 
 ## Overview
@@ -38,12 +38,12 @@ dxcaddy install <module1> <module2> ...
 ### Install Caddy with modules (Multi-stage build)
 
 ```dockerfile
-FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest as caddy
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest as caddy
 
 # Install Caddy with the geoip2 module example
 RUN dxcaddy github.com/zhangjiayin/caddy-geoip2
 
-FROM ghcr.io/laravel-glimmer/wolfi-caddy:latest
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
 
 # Copy the Caddy binary from the previous stage
 COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
