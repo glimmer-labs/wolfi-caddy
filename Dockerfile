@@ -15,4 +15,6 @@ RUN apk add --no-cache caddy
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/*
 
+RUN add-glimmer-labs-repo
+
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
