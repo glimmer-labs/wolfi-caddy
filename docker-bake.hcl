@@ -31,3 +31,9 @@ target default {
       "org.opencontainers.image.description" = "A Docker image based on Wolfi Linux with a script for installing/building Caddy web server with modules easily.",
   }
 }
+
+target docker-proxy {
+  inherits = ["default"]
+  dockerfile = "Dockerfile.proxy"
+  tags = ["${REGISTRY}/${IMAGE_OWNER}/${IMAGE_NAME}:docker-proxy"]
+}

@@ -30,7 +30,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Normalize module list
-CADDY_MODULES="$(echo "$POSITIONAL_MODULES" | sed 's/  */,/g' | sed 's/^,//' | sed 's/,$//')"
+MERGED_MODULES="$DEFAULT_PLUGINS $POSITIONAL_MODULES"
+CADDY_MODULES="$(echo "$MERGED_MODULES" | sed 's/  */,/g' | sed 's/^,//' | sed 's/,$//')"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT

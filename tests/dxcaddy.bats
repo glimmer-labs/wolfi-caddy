@@ -68,3 +68,11 @@ teardown() {
   [ "$status" -ne 0 ]
   [[ "$output" == *"[ERROR] Failed to build Caddy with xcaddy"* ]]
 }
+
+@test "keeps default plugins set by environment variable" {
+  export DEFAULT_PLUGINS=github.com/lucaslorentz/caddy-docker-proxy/v2
+
+  run ./dxcaddy-test.sh github.com/example/module
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Modules: github.com/lucaslorentz/caddy-docker-proxy/v2,github.com/example/module"* ]]
+}

@@ -22,7 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       digest: ${{ steps.get.outputs.digest }}
-
     steps:
       - name: Set up skopeo
         uses: warjiang/setup-skopeo@main
@@ -39,8 +38,14 @@ jobs:
     needs: wolfi-digest
     permissions:
       packages: write
-
+    strategy:
+      matrix:
+        target: ['default', 'docker-proxy']
+      max-parallel: 1
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -67,7 +72,9 @@ jobs:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           WOLFI_DIGEST:  ${{ needs.wolfi-digest.outputs.digest }}
         with:
+          source: .
           push: true
+          targets: ${{ matrix.target }}
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max

@@ -1,0 +1,11 @@
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest AS build
+
+RUN dxcaddy github.com/lucaslorentz/caddy-docker-proxy/v2
+
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
+
+ENV DEFAULT_PLUGINS=github.com/lucaslorentz/caddy-docker-proxy/v2
+
+COPY --link --from=build /usr/bin/caddy /usr/bin/caddy
+
+CMD ["caddy", "docker-proxy"]
