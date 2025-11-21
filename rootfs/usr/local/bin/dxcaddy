@@ -36,6 +36,7 @@ CADDY_MODULES="$(echo "$MERGED_MODULES" | sed 's/  */,/g' | sed 's/^,//' | sed '
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
+OG_IFS="$IFS"
 run_with_timeout() {
     timeout "$COMMAND_TIMEOUT" "$@"
 }
@@ -58,9 +59,9 @@ caddy_add_package() {
     MODULES=""
     IFS=','; for mod in $CADDY_MODULES; do
         MODULES="${MODULES:+$MODULES }$mod"
-    done
+    done; IFS="$OG_IFS"
 
-    run_with_timeout caddy add-package "$MODULES" || return 1
+    run_with_timeout caddy add-package $MODULES || return 1
 
     echo "[SUCCESS] Modules installed with caddy 'add-package' correctly"
     return 0
@@ -105,7 +106,7 @@ build_with_xcaddy() {
     set --
     IFS=','; for mod in $CADDY_MODULES; do
         set -- "$@" --with "$mod"
-    done
+    done; IFS="$OG_IFS"
 
     xcaddy build $@ --output $CADDY_OUTPUT || return 1
     chmod +x "$CADDY_OUTPUT"
