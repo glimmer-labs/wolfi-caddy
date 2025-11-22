@@ -57,7 +57,9 @@ caddy_add_package() {
     fi
 
     MODULES=""
-    IFS=','; for mod in $CADDY_MODULES; do
+    INPUT_MODULES="$(echo "$POSITIONAL_MODULES" | sed 's/  */,/g' | sed 's/^,//' | sed 's/,$//')"
+    IFS=','; for mod in $INPUT_MODULES; do
+        ["$mod" == ]
         MODULES="${MODULES:+$MODULES }$mod"
     done; IFS="$OG_IFS"
 
@@ -81,8 +83,13 @@ download_from_api() {
 
     apk add --no-cache curl
 
+    MODULES=""
+    IFS=','; for mod in $CADDY_MODULES; do
+        MODULES="${MODULES:+${MODULES}&}p=$mod"
+    done; IFS="$OG_IFS"
+
     API_URL="$CADDY_DOWNLOAD_URL?os=linux&arch=$ARCH"
-    [ -n "$CADDY_MODULES" ] && API_URL="$API_URL&p=$CADDY_MODULES"
+    [ -n "$MODULES" ] && API_URL="$API_URL&$MODULES"
 
     echo "[DEBUG] $API_URL"
     run_with_timeout curl -fsSL "$API_URL" -o "$TMP_DIR/caddy" || return 1
