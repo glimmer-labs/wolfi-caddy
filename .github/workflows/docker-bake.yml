@@ -8,8 +8,10 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/docker-bake.yml'
       - 'rootfs/**'
       - 'Dockerfile'
+      - 'Dockerfile.*'
       - 'docker-bake.hcl'
 
   workflow_dispatch:
@@ -72,8 +74,8 @@ jobs:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           WOLFI_DIGEST:  ${{ needs.wolfi-digest.outputs.digest }}
         with:
-          source: .
           push: true
+          pull: true
           targets: ${{ matrix.target }}
           set: |
             *.cache-from=type=gha
