@@ -2,10 +2,24 @@ FROM ghcr.io/glimmer-labs/wolfi-caddy:latest AS build
 
 RUN dxcaddy github.com/lucaslorentz/caddy-docker-proxy/v2
 
-FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
+FROM cgr.dev/chainguard/wolfi-base:latest
 
+ENV XDG_DATA_HOME=/data
+ENV XDG_CONFIG_HOME=/config
 ENV DEFAULT_PLUGINS=github.com/lucaslorentz/caddy-docker-proxy/v2
 
+EXPOSE 80
+EXPOSE 443
+EXPOSE 443/udp
+EXPOSE 2019
+
+WORKDIR /app
+
 COPY --link --from=build /usr/bin/caddy /usr/bin/caddy
+
+COPY rootfs/ /
+RUN chmod +x /usr/local/bin/*
+
+RUN add-glimmer-labs-repo
 
 CMD ["caddy", "docker-proxy"]
