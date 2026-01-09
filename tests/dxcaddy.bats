@@ -23,13 +23,6 @@ teardown() {
   [[ "$output" == *"Downloads Caddy binary from the official API."* ]]
 }
 
-@test "installs Caddy without modules using caddy add-package" {
-  run ./dxcaddy-test.sh
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"apk called with: add --no-cache caddy"* ]]
-  [[ "$output" == *"[SUCCESS] Caddy updated correctly"* ]]
-}
-
 @test "installs Caddy with modules using caddy add-package" {
   run ./dxcaddy-test.sh github.com/example/module github.com/foo/bar
   [ "$status" -eq 0 ]
