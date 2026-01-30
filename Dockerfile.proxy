@@ -15,11 +15,10 @@ EXPOSE 2019
 
 WORKDIR /app
 
-COPY --link --from=build /usr/bin/caddy /usr/bin/caddy
-
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/*
-
 RUN add-glimmer-labs-repo
+
+COPY --link --from=build /usr/bin/caddy /usr/bin/caddy
 
 CMD ["caddy", "docker-proxy"]

@@ -10,11 +10,10 @@ EXPOSE 2019
 
 WORKDIR /app
 
-RUN apk add --no-cache caddy
-
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/*
-
 RUN add-glimmer-labs-repo
+
+RUN apk add --no-cache caddy
 
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
