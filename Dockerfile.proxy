@@ -17,4 +17,7 @@ WORKDIR /app
 
 COPY --link --from=build /usr/bin/caddy /usr/bin/caddy
 
+#Required to bind to privileged ports and access Docker socket
+USER root 
+
 CMD ["caddy", "docker-proxy"]
