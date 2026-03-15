@@ -6,7 +6,7 @@ A Docker image based on Wolfi Linux with a script for installing/building Caddy 
 FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
 ```
 
-Also there is a docker-proxy variant based on [caddy-docker-proxy](https://github.com/lucaslorentz/caddy-docker-proxy) that can be used as a reverse proxy for Docker containers.
+There is a distroless docker-proxy variant based on [caddy-docker-proxy](https://github.com/lucaslorentz/caddy-docker-proxy) that can be used as a reverse proxy for Docker containers.
 
 ```dockerfile
 FROM ghcr.io/glimmer-labs/wolfi-caddy:docker-proxy
@@ -41,7 +41,7 @@ dxcaddy <module1> <module2> ...
 
 ## Common Use Cases
 
-### Install Caddy with modules (Multi-stage build)
+### Caddy with extra modules (Multi-stage build - distroless)
 
 ```dockerfile
 FROM ghcr.io/glimmer-labs/wolfi-caddy:latest as caddy
@@ -49,7 +49,24 @@ FROM ghcr.io/glimmer-labs/wolfi-caddy:latest as caddy
 # Install Caddy with the geoip2 module example
 RUN dxcaddy github.com/zhangjiayin/caddy-geoip2
 
-FROM ghcr.io/glimmer-labs/wolfi-caddy:latest
+FROM cgr.dev/chainguard/static:latest
+
+# Copy the Caddy binary from the previous stage
+COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
+
+# Define a entrypoint as static distroless doesn't have one
+ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+```
+
+### Caddy with extra modules (Multi-stage build - wolfi base)
+
+```dockerfile
+FROM ghcr.io/glimmer-labs/wolfi-caddy:latest as caddy
+
+# Install Caddy with the geoip2 module example
+RUN dxcaddy github.com/zhangjiayin/caddy-geoip2
+
+FROM cgr.dev/chainguard/wolfi-base:latest
 
 # Copy the Caddy binary from the previous stage
 COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
@@ -58,7 +75,7 @@ COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
 ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 ```
 
-### Using Caddy as a docker-proxy
+## Using Caddy as a docker-proxy
 
 ```yml
 services:
