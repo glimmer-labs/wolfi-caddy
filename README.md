@@ -92,7 +92,7 @@ services:
   caddy:
     image: ghcr.io/glimmer-labs/wolfi-caddy:docker-proxy
     environment:
-      - CADDY_DOCKER_CADDYFILE_PATH=/config/caddy/Caddyfile.cloudflare_proxy # Optional, enables trusted_proxies cloudflare
+      - CADDY_DOCKER_CADDYFILE_PATH=/config/caddy/Caddyfile.cloudflare # Optional, enables trusted_proxies cloudflare
     ports:
       - 80:80
       - 443:443/tcp
