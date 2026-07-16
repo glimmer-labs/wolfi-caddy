@@ -11,6 +11,7 @@ There is a distroless docker-proxy variant based on [caddy-docker-proxy](https:/
 ```dockerfile
 FROM ghcr.io/glimmer-labs/wolfi-caddy:docker-proxy
 ```
+> Includes the [caddy-cloudflare-ip](https://github.com/WeidiDeng/caddy-cloudflare-ip) plugin by default for convenience. The `trusted_proxies cloudflare` directive is disabled by default.
 
 ## Overview
 
@@ -75,12 +76,23 @@ COPY --link --from=caddy /usr/bin/caddy /usr/bin/caddy
 ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 ```
 
+### Docker proxy image
+
+This image ships with the [caddy-cloudflare-ip](https://github.com/WeidiDeng/caddy-cloudflare-ip) plugin pre-installed, but it does **not** enable the `trusted_proxies cloudflare` directive automatically.
+
+To enable it, choose one of the following options:
+
+- Add `trusted_proxies cloudflare` to your existing Caddyfile.
+- Set the `CADDY_DOCKER_CADDYFILE_PATH` environment variable to `/config/caddy/Caddyfile.cloudflare`, which uses a Caddyfile with the directive already enabled.
+
 ## Using Caddy as a docker-proxy
 
 ```yml
 services:
   caddy:
     image: ghcr.io/glimmer-labs/wolfi-caddy:docker-proxy
+    environment:
+      - CADDY_DOCKER_CADDYFILE_PATH=/config/caddy/Caddyfile.cloudflare_proxy # Optional, enables trusted_proxies cloudflare
     ports:
       - 80:80
       - 443:443/tcp

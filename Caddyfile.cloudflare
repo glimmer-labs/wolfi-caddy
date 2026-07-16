@@ -1,0 +1,8 @@
+{
+    servers {
+        trusted_proxies cloudflare {
+            interval 12h
+            timeout 15s
+        }
+    }
+}
